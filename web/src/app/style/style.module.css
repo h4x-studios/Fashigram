@@ -1,0 +1,207 @@
+.container {
+    padding-bottom: 80px;
+    /* Space for bottom nav */
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+.header {
+    background-color: #ffffff;
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #eee;
+}
+
+.navBar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.backButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-left: -8px;
+    /* Offset for padding alignment */
+}
+
+.titleArea {
+    text-align: center;
+    width: 100%;
+    margin-right: 2rem;
+    /* Balance back button */
+}
+
+.title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #000;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0;
+}
+
+.blurbSection {
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+.blurbText {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #444;
+    margin: 0;
+    font-style: italic;
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 1rem;
+    font-family: var(--font-outfit), sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #888;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    letter-spacing: -0.01em;
+}
+
+.tabSuffix {
+    font-weight: 400;
+    font-size: 0.85em;
+    color: #888;
+    margin-left: 4px;
+}
+
+.activeTab .tabSuffix {
+    color: #666;
+    /* Slightly darker when active, but still muted compared to main label */
+}
+
+.activeTab {
+    color: #000;
+    border-bottom: 2px solid #ff0050;
+}
+
+.feed {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background-color: #fff;
+    /* White background for the grid itself */
+}
+
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    text-align: center;
+    padding: 2rem;
+}
+
+.errorTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.errorText {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.homeButton {
+    background-color: #ff0050;
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 24px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Bottom Navigation */
+.navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg, #ffffff);
+    border-top: 1px solid var(--border-light, #eee);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0;
+    z-index: 100;
+}
+
+.navIcon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    opacity: 0.5;
+    color: var(--text-primary, #000);
+    transition: opacity 0.2s ease;
+}
+
+.navIcon:hover {
+    opacity: 1;
+}
+
+.createButton {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-pink, #ff0050);
+    color: white;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+    margin-top: -28px;
+    /* Pull it up like the main page */
+}
+
+.createButton svg {
+    /* SVG size handled by createButton font-size or specifc styling if needed,
+       but page.module.css didn't target svg specifically, it set font-size: 32px on container.
+       The PlusIcon in Icons.tsx is 32x32. */
+    width: 32px;
+    height: 32px;
+}

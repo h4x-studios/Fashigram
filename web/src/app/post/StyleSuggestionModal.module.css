@@ -1,0 +1,91 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal {
+    background: var(--card-bg);
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-light);
+}
+
+.header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.searchSection {
+    padding: 12px;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.searchInput:focus {
+    border-color: var(--primary-pink);
+}
+
+.list {
+    overflow-y: auto;
+    padding: 0 12px 12px 12px;
+}
+
+.option {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.option:hover {
+    background: var(--background-secondary);
+}
+
+.option:last-child {
+    border-bottom: none;
+}
+
+.matchHighlight {
+    font-weight: 600;
+    color: var(--text-primary);
+}

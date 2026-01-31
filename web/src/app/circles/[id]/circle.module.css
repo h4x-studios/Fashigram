@@ -1,0 +1,134 @@
+/* Module styling for Circle detail view */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+    /* Space for bottom nav if present, or just breathing room */
+}
+
+.header {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--card-bg);
+}
+
+.headerTop {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.backButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.settingsButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.iconWrapper {
+    margin-bottom: 16px;
+}
+
+.circleName {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.circleMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-light);
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    /* Or card-bg */
+    z-index: 10;
+}
+
+.tab {
+    flex: 1;
+    padding: 16px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.activeTab {
+    color: var(--primary-pink);
+}
+
+.activeTab::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-pink);
+}
+
+.spotlightLabel {
+    /* Style for textual label if used inside tab */
+}
+
+.filters {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--card-bg);
+}
+
+.filterRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.feed {
+    padding: 0;
+}
+
+.spotlightTileBadge {
+    display: inline-block;
+    color: var(--primary-pink);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+}
+
+.spotlightSubtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}

@@ -1,0 +1,98 @@
+.nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    /* Taller for better touch targets */
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: center;
+    /* Center the inner container */
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
+    /* iOS Safe Area */
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.navInner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Center the items */
+    gap: clamp(24px, 8vw, 80px);
+    /* Responsive gap that scales with viewport */
+    width: 100%;
+    max-width: 480px;
+    /* Tighter constraint for better grouping */
+    padding: 0 16px;
+    height: 100%;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    /* Larger touch target */
+    height: 100%;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.item:active {
+    opacity: 0.7;
+}
+
+.active {
+    color: var(--primary-pink);
+}
+
+.icon {
+    width: clamp(28px, 5vw, 32px);
+    /* Scale between 28-32px based on viewport */
+    height: clamp(28px, 5vw, 32px);
+}
+
+.circleIconContainer {
+    width: clamp(34px, 6vw, 38px);
+    /* Slightly larger than other icons */
+    height: clamp(34px, 6vw, 38px);
+}
+
+.fabContainer {
+    position: relative;
+    top: -20px;
+    /* Floating slightly above */
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fab {
+    width: 60px;
+    /* Larger FAB */
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primary-pink);
+    color: white;
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+.fabIcon {
+    width: 32px;
+    height: 32px;
+}

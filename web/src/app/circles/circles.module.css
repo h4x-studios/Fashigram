@@ -1,0 +1,173 @@
+.container {
+    padding: 24px;
+    padding-bottom: 100px;
+    /* Space for bottom nav */
+    background: #F9FAFB;
+    /* Light grey bg */
+}
+
+.header {
+    margin-bottom: 24px;
+    padding-top: 8px;
+}
+
+.title {
+    font-size: 28px;
+    /* Large title */
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+}
+
+.sectionHeader {
+    font-size: 13px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    margin-top: 32px;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid transparent;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.cardLeft {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+}
+
+.cardSubtitle {
+    font-size: 13px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.createButtonContainer {
+    position: fixed;
+    bottom: 88px;
+    /* Above the bottom nav (which is typically 72px + 16px padding) */
+    left: 24px;
+    right: 24px;
+    display: flex;
+    justify-content: center;
+    z-index: 101;
+    /* Above bottom nav (which is z-index: 100) */
+}
+
+.createButton {
+    background: #E91E63;
+    /* Pink */
+    color: white;
+    width: 100%;
+    max-width: 400px;
+    padding: 16px;
+    border-radius: 100px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    box-shadow: 0 4px 16px rgba(233, 30, 99, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.createButton:hover {
+    transform: scale(1.02);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.dreamInviteCard {
+    background: linear-gradient(135deg, #fff 0%, #fef5f8 100%);
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(233, 30, 99, 0.08);
+    border: 1px solid rgba(233, 30, 99, 0.1);
+}
+
+.dreamInviteCard .cardTitle {
+    font-size: 17px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.3px;
+}
+
+.dreamInviteCard .cardSubtitle {
+    font-size: 12px;
+    color: #888;
+    font-weight: 500;
+    margin-top: 4px;
+    font-style: italic;
+    letter-spacing: 0.2px;
+}
+
+/* Invites Section matching My Circles layout */
+
+.filters {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: var(--card-bg);
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.starIcon,
+.globeIcon {
+    color: var(--text-secondary);
+}
+
+.starIconActive,
+.globeIconActive {
+    color: var(--primary-pink);
+}

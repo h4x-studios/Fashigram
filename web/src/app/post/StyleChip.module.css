@@ -1,0 +1,83 @@
+.chipContainer {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+    /* Minimal spacing, grid will handle gaps */
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s ease;
+}
+
+.chipContainer:active {
+    transform: scale(0.96);
+}
+
+.styleBubble {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    z-index: 2;
+    /* Sits on top */
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.voteBubble {
+    background: var(--background-secondary);
+    /* Light grey usually, or pink if actively voted? Spec says "No color-coding for 'good/bad'" */
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 4px 8px 4px 16px;
+    /* Padding left accounts for overlap */
+    margin-left: -12px;
+    /* Pull left to underlap */
+    z-index: 1;
+    position: relative;
+    border: 1px solid transparent;
+    /* Placeholder for future active states */
+}
+
+/* Primary (Declared) Style */
+.chipContainer.declared .styleBubble {
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
+    background: #fff0f6;
+    /* Very light pink tint */
+}
+
+.chipContainer.declared .voteBubble {
+    background: var(--primary-pink);
+    color: white;
+}
+
+/* Voted State (User has voted on this) */
+.chipContainer.voted .voteBubble {
+    background: var(--primary-pink);
+    /* Highlight vote bubble if user voted? Spec didn't explicitely say, but typical */
+    color: white;
+}
+
+/* Sizing Buckets */
+.sizeSmall .styleBubble {
+    font-size: 13px;
+    padding: 5px 12px;
+}
+
+.sizeMedium .styleBubble {
+    font-size: 15px;
+    padding: 7px 16px;
+}
+
+.sizeLarge .styleBubble {
+    font-size: 17px;
+    padding: 9px 20px;
+    font-weight: 700;
+}
