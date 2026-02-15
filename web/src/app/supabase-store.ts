@@ -5,6 +5,7 @@ import { PostData, StyleVote, User, Circle, CircleMember, SpotlightEntry } from 
 const mapPost = (dbPost: any): PostData => {
     return {
         id: dbPost.id,
+        userId: dbPost.user_id,
         username: dbPost.user?.username || 'unknown',
         avatarUrl: dbPost.user?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=unknown',
         countryName: dbPost.country_name,
@@ -103,6 +104,18 @@ export class SupabaseStore {
         });
 
         return postData.id;
+    }
+
+    async deletePost(id: string): Promise<boolean> {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
+
+        const { error } = await supabase
+            .from('posts')
+            .delete()
+            .match({ id, user_id: user.id });
+
+        return !error;
     }
 
     // PROFILE METHODS

@@ -13,7 +13,8 @@ import {
     HomeIcon,
     PlusIcon,
     UserIcon,
-    ArrowLeftIcon
+    ArrowLeftIcon,
+    TrashIcon
 } from "../components/Icons";
 import ChooseCircleModal from "../components/ChooseCircleModal";
 import CircleIcon from "../components/CircleIcon";
@@ -169,6 +170,19 @@ export default function PostDetailView({ id }: { id: string }) {
         setIsModalOpen(false);
     };
 
+    const handleDelete = async () => {
+        if (!user || user.id !== post?.userId) return;
+
+        if (window.confirm("Are you sure you want to permanently delete this post?")) {
+            const success = await demoStore.deletePost(id);
+            if (success) {
+                router.push('/');
+            } else {
+                setError("Failed to delete post");
+            }
+        }
+    };
+
     if (!post) return <div>Loading...</div>; // Or return null
 
     const galleryClass = post.images.length === 1 ? styles.gallery1 :
@@ -211,15 +225,26 @@ export default function PostDetailView({ id }: { id: string }) {
                         <span className={styles.declaredStyleHeader}>{post.style}</span>
                     </div>
 
-                    {/* Circle Icon with + on same row as user info */}
-                    <button
-                        onClick={() => setIsSpotlightModalOpen(true)}
-                        className={styles.userSectionCircleButton}
-                        title="Add to Circle Spotlight"
-                    >
-                        <CircleIcon staticIcon size={18} />
-                        <span className={styles.plusIcon}>+</span>
-                    </button>
+                    {/* Circle Icon and Delete Button */}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        {user?.id === post.userId && (
+                            <button
+                                onClick={handleDelete}
+                                className={styles.deleteButton}
+                                title="Delete Post"
+                            >
+                                <TrashIcon className={styles.trashIcon} />
+                            </button>
+                        )}
+                        <button
+                            onClick={() => setIsSpotlightModalOpen(true)}
+                            className={styles.userSectionCircleButton}
+                            title="Add to Circle Spotlight"
+                        >
+                            <CircleIcon staticIcon size={18} />
+                            <span className={styles.plusIcon}>+</span>
+                        </button>
+                    </div>
                 </section>
 
                 {/* Media Gallery */}

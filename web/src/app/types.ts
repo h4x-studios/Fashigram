@@ -4,6 +4,7 @@ export type { Circle, CircleMember, SpotlightEntry };
 
 export interface PostData {
     id: string;
+    userId: string; // From table
     username: string;
     avatarUrl?: string; // from user profile
     countryName?: string;

@@ -375,8 +375,38 @@
 }
 
 .logoContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+.deleteButton {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+    padding: 0;
+    flex-shrink: 0;
+    color: #666;
+}
+
+.deleteButton:hover {
+    background: #fff5f5;
+    border-color: #ffcdd2;
+    color: #e53935;
+    transform: scale(1.1);
+}
+
+.trashIcon {
+    width: 18px;
+    height: 18px;
 }
