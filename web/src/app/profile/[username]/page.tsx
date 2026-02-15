@@ -66,12 +66,6 @@ export default function Page({ params }: { params: Promise<{ username: string }>
     if (!user) {
         return (
             <div className={styles.container}>
-                <header className={styles.header}>
-                    <button className={styles.backButton} onClick={() => router.push('/')}>
-                        ←
-                    </button>
-                    <h1 className={styles.headerTitle}>Not Found</h1>
-                </header>
                 <div className={styles.centerMessage}>
                     <p>User not found.</p>
                     <button onClick={() => router.push('/')} style={{ textDecoration: 'underline' }}>

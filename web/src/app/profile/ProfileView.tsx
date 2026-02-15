@@ -8,14 +8,8 @@ import { User, PostData, demoStore } from "../demo-store";
 import ProfilePostTile from "./ProfilePostTile";
 import FilterDropdown from "../feed/FilterDropdown";
 import { STYLES } from "../data/styles";
-import Sidebar from "../components/Sidebar";
 import {
-    ChevronDownIcon,
-    StarIcon,
-    HomeIcon,
-    PlusIcon,
-    UserIcon,
-    ArrowLeftIcon
+    StarIcon
 } from "../components/Icons";
 
 interface ProfileViewProps {
@@ -27,7 +21,6 @@ interface ProfileViewProps {
 export default function ProfileView({ user, posts, isOwner = false }: ProfileViewProps) {
     const router = useRouter();
     const [styleFilter, setStyleFilter] = useState<string | null>(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Cache suggested styles for filtering. Map<PostId, SuggestedStyles[]>
     const [suggestionsMap, setSuggestionsMap] = useState<Record<string, string[]>>({});
@@ -76,15 +69,6 @@ export default function ProfileView({ user, posts, isOwner = false }: ProfileVie
 
     return (
         <div className={styles.container}>
-            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-            {/* Header */}
-            <header className={styles.header}>
-                <button className={styles.backButton} onClick={() => router.back()}>
-                    <ArrowLeftIcon />
-                </button>
-                <h1 className={styles.headerTitle}>{user.username}</h1>
-            </header>
 
             {/* User Details */}
             <section className={styles.userHeader}>
@@ -134,19 +118,6 @@ export default function ProfileView({ user, posts, isOwner = false }: ProfileVie
                 </div>
             )}
 
-            {/* Navbar */}
-            <nav className={styles.navbar}>
-                <Link href="/" className={styles.navIcon}><HomeIcon filled /></Link>
-                <Link href="/create" className={styles.createButton}>
-                    <PlusIcon />
-                </Link>
-                <Link
-                    href={isOwner ? `/profile/${user.username}` : "/auth/login"}
-                    className={`${styles.navIcon} ${isOwner ? styles.navIconActive : ''}`}
-                >
-                    <UserIcon filled className={isOwner ? '' : styles.navUserIcon} />
-                </Link>
-            </nav>
         </div>
     );
 }
