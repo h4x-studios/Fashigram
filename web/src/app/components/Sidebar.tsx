@@ -127,15 +127,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </button>
 
                     {/* Settings */}
-                    <button
-                        className={styles.menuItem}
-                        onClick={() => handleNavigation('/settings')}
-                    >
-                        <span className={`${styles.menuIcon} ${styles.menuIconInactive}`}>
-                            <SettingsIcon />
-                        </span>
-                        Settings
-                    </button>
+                    {user && (
+                        <button
+                            className={styles.menuItem}
+                            onClick={() => handleNavigation('/settings')}
+                        >
+                            <span className={`${styles.menuIcon} ${styles.menuIconInactive}`}>
+                                <SettingsIcon />
+                            </span>
+                            Settings
+                        </button>
+                    )}
 
                     {/* Login/Logout */}
                     {user ? (
