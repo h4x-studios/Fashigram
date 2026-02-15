@@ -113,17 +113,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </button>
 
                     {/* Circles */}
-                    {user && (
-                        <button
-                            className={`${styles.menuItem} ${isCirclesActive ? styles.menuItemActive : ''}`}
-                            onClick={() => handleNavigation('/circles')}
-                        >
-                            <span className={`${styles.menuIcon} ${isCirclesActive ? styles.menuIconActive : styles.menuIconInactive}`}>
-                                <CircleIcon animateOnHover={true} />
-                            </span>
-                            Circles
-                        </button>
-                    )}
+                    <button
+                        className={`${styles.menuItem} ${isCirclesActive ? styles.menuItemActive : ''}`}
+                        onClick={() => handleNavigation('/circles')}
+                    >
+                        <span className={`${styles.menuIcon} ${isCirclesActive ? styles.menuIconActive : styles.menuIconInactive}`}>
+                            <CircleIcon animateOnHover={true} />
+                        </span>
+                        Circles
+                    </button>
 
                     {/* Settings */}
                     <button

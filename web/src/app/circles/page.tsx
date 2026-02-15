@@ -18,23 +18,45 @@ export default function CirclesPage() {
 
     useEffect(() => {
         const load = async () => {
-            if (!user) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
             setLoading(true);
 
-            // Parallel load
-            const [myCircles, myInvites] = await Promise.all([
-                demoStore.getCirclesForUser(user.id),
-                // We don't have a direct getInvitesForUser but we can use getCircleMembers check
-                // Actually, let's just fetch all circles first or add a helper
-                [] as CircleMember[] // Placeholder for now
-            ]);
+            try {
+                // Parallel load
+                const [myCircles, myInvites] = await Promise.all([
+                    demoStore.getCirclesForUser(user.id),
+                    demoStore.getCircleMembers(user.id, 'INVITED')
+                ]);
 
-            setCircles(myCircles);
-            setInvites(myInvites);
-            setLoading(false);
+                setCircles(myCircles);
+                setInvites(myInvites);
+            } catch (err) {
+                console.error("Error loading circles:", err);
+            } finally {
+                setLoading(false);
+            }
         };
         load();
     }, [user]);
+
+    if (!user && !loading) {
+        return (
+            <div className={styles.container}>
+                <header className={styles.header}>
+                    <h1 className={styles.title}>Circles</h1>
+                </header>
+                <div className={styles.emptyState}>
+                    <p>Log in to view and join circles.</p>
+                    <Link href="/auth/login" className={styles.createButton} style={{ marginTop: 20, textDecoration: 'none' }}>
+                        Log In
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return <div className={styles.container}>Loading your circles...</div>;
