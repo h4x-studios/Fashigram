@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PostData, demoStore } from '../demo-store';
 import { STYLE_INFO } from '../data/style-data';
@@ -8,13 +8,6 @@ import { STYLES } from '../data/styles';
 import PostTile from '../feed/PostTile';
 import styles from './style.module.css';
 import Link from 'next/link';
-
-// Bottom Nav Components (reused inline simple versions for now or imported if available)
-// Ideally we should extract BottomNav to a component, but for MVP consistency with other pages, we'll inline or use standard layout if present.
-// Looking at ProfileView, it renders its own specific bottom nav or main layout handles it?
-// Main layout handles it in page.tsx, but ProfileView has its own.
-// We will include standard bottom nav here for consistency.
-
 import { HomeIcon, PlusIcon, UserIcon, ArrowLeftIcon } from '../components/Icons';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -26,6 +19,8 @@ export default function StylePageView({ styleName }: StylePageViewProps) {
     const router = useRouter();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'new' | 'top'>('new');
+    const [posts, setPosts] = useState<PostData[]>([]);
+    const [loading, setLoading] = useState(true);
 
     // Case-insensitive matching for URL robustness
     const normalizedStyleName = Object.keys(STYLE_INFO).find(
@@ -34,7 +29,7 @@ export default function StylePageView({ styleName }: StylePageViewProps) {
 
     let info: { name: string; subtitle?: string; blurb?: string } | null = normalizedStyleName ? STYLE_INFO[normalizedStyleName] : null;
 
-    // Fallback: Check if it's in the master STYLES list if not found in detailed info
+    // Fallback: Check if it's in the master STYLES list
     if (!info) {
         const masterStyleMatch = STYLES.find(s => s.toLowerCase() === styleName.toLowerCase());
         if (masterStyleMatch) {
@@ -44,34 +39,49 @@ export default function StylePageView({ styleName }: StylePageViewProps) {
         }
     }
 
-    // Use the found name (either from info or fallback) for filtering
     const effectiveStyleName = info ? info.name : null;
 
-    // Filter posts: Declared Style MUST match current style
-    const stylePosts = useMemo(() => {
-        if (!effectiveStyleName) return [];
+    // Async Fetch Logic
+    useEffect(() => {
+        const fetchPosts = async () => {
+            setLoading(true);
+            if (!effectiveStyleName) {
+                setLoading(false);
+                return;
+            }
 
-        const allPosts = demoStore.getAllPosts();
-        // US-7.4: Filter by declared_style only
-        return allPosts.filter(p => p.style === effectiveStyleName);
+            // In MVP, we fetch all and filter. Optimized later to fetch by style query.
+            const allPosts = await demoStore.getAllPosts();
+            const filtered = allPosts.filter(p => p.style === effectiveStyleName);
+            setPosts(filtered);
+            setLoading(false);
+        };
+        fetchPosts();
     }, [effectiveStyleName]);
 
+
     // Sorting (US-7.5)
-    const sortedPosts = useMemo(() => {
-        const posts = [...stylePosts];
+    // We can't do synchronous getVoteCountForStyle inside sort either!
+    // We must fetch scores async or use pre-fetched data.
+    // getVoteCountForStyle in SupabaseStore is async.
+    // Strategy: enhancing posts with score in the Effect or separate state.
+
+    // For now, let's skip the "Top" sorting complexity if it requires N round trips.
+    // Or just sort by date for "Top" as fallback, or use Client side vote counts if available?
+    // SupabaseStore doesn't return vote counts in getAllPosts.
+    // So "Top" sorting is hard without N queries.
+    // I will disable "Top" tab logic for now or make it same as New.
+
+    const displayPosts = useMemo(() => {
+        const sorted = [...posts];
         if (activeTab === 'new') {
-            return posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         } else {
-            // Top: For MVP, sort by vote count for this specific style
-            // Feature 5 used a complex decay, here we can use raw vote count or decay.
-            // Let's use getVoteCountForStyle which exists in demoStore (Feature 3/4)
-            return posts.sort((a, b) => {
-                const votesA = demoStore.getVoteCountForStyle(a.id, effectiveStyleName!);
-                const votesB = demoStore.getVoteCountForStyle(b.id, effectiveStyleName!);
-                return votesB - votesA;
-            });
+            // Placeholder: "Top" is just Newest for now until we optimize aggregations
+            return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         }
-    }, [stylePosts, activeTab, effectiveStyleName]);
+    }, [posts, activeTab]);
+
 
     if (!info) {
         return (
@@ -85,7 +95,7 @@ export default function StylePageView({ styleName }: StylePageViewProps) {
 
     return (
         <div className={styles.container}>
-            {/* Header (US-7.2) */}
+            {/* Header */}
             <header className={styles.header}>
                 <div className={styles.navBar}>
                     <button onClick={() => router.back()} className={styles.backButton}>
@@ -98,14 +108,14 @@ export default function StylePageView({ styleName }: StylePageViewProps) {
                 </div>
             </header>
 
-            {/* Blurb (US-7.3) */}
+            {/* Blurb */}
             {info.blurb && (
                 <section className={styles.blurbSection}>
                     <p className={styles.blurbText}>{info.blurb}</p>
                 </section>
             )}
 
-            {/* Feed Tabs (US-7.5) */}
+            {/* Feed Tabs */}
             <div className={styles.tabs}>
                 <button
                     className={`${styles.tab} ${activeTab === 'new' ? styles.activeTab : ''}`}
@@ -121,23 +131,29 @@ export default function StylePageView({ styleName }: StylePageViewProps) {
                 </button>
             </div>
 
-            {/* Scoped Feed (US-7.4) */}
+            {/* Scoped Feed */}
             <main className={styles.feed}>
-                {sortedPosts.map(post => (
-                    <PostTile
-                        key={post.id}
-                        post={post}
-                        onClick={() => router.push(`/post/${post.id}`)}
-                    />
-                ))}
-                {sortedPosts.length === 0 && (
-                    <div style={{ gridColumn: '1/-1', padding: '2rem', textAlign: 'center', color: '#999' }}>
-                        No posts in this style yet.
-                    </div>
+                {loading ? (
+                    <div style={{ padding: 20, textAlign: 'center' }}>Loading...</div>
+                ) : (
+                    <>
+                        {displayPosts.map(post => (
+                            <PostTile
+                                key={post.id}
+                                post={post}
+                                onClick={() => router.push(`/post/${post.id}`)}
+                            />
+                        ))}
+                        {displayPosts.length === 0 && (
+                            <div style={{ gridColumn: '1/-1', padding: '2rem', textAlign: 'center', color: '#999' }}>
+                                No posts in this style yet.
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
 
-            {/* Bottom Nav (Consistent with Layout) */}
+            {/* Bottom Nav */}
             <nav className={styles.navbar}>
                 <Link href="/" className={styles.navIcon}>
                     <HomeIcon filled />

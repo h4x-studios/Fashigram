@@ -7,11 +7,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import ProfileView from "../ProfileView";
 import styles from "../profile.module.css";
 
-// Force valid seeding before render logic
-if (typeof window !== 'undefined' && demoStore.getAllPosts().length === 0) {
-    demoStore.seedDemoPosts();
-}
-
 export default function Page({ params }: { params: Promise<{ username: string }> }) {
     const { username } = use(params);
     const router = useRouter();
@@ -21,40 +16,44 @@ export default function Page({ params }: { params: Promise<{ username: string }>
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Ensure seeding is done
-        if (demoStore.getAllPosts().length === 0) {
-            demoStore.seedDemoPosts();
-        }
+        const loadData = async () => {
+            setLoading(true);
+            const decodedUsername = decodeURIComponent(username);
+            let targetUsername = decodedUsername;
 
-        const decodedUsername = decodeURIComponent(username);
-        let targetUsername = decodedUsername;
+            // ALIAS: "you" (case-insensitive) -> Logged-in user
+            if (decodedUsername.toLowerCase() === 'you' && authUser) {
+                targetUsername = authUser.username;
+            } else if (decodedUsername.toLowerCase() === 'you' && !authUser) {
+                // Not logged in trying to view 'you'
+                router.push('/auth/login');
+                return;
+            }
 
-        // ALIAS: "you" (case-insensitive) -> Logged-in user
-        if (decodedUsername.toLowerCase() === 'you' && authUser) {
-            targetUsername = authUser.username;
-        }
+            let userData = await demoStore.getUser(targetUsername);
 
-        let userData = demoStore.getUser(targetUsername);
+            // "You" fallback if missing in DB but exists in Auth (shouldn't happen with proper seed, but for robustness)
+            if (!userData && authUser && authUser.username === targetUsername) {
+                // We rely on AuthContext if DB lookup fails?
+                // Or we can construct a transient User object.
+                userData = {
+                    id: authUser.id,
+                    username: authUser.username,
+                    avatarUrl: authUser.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.username}`,
+                    bio: authUser.bio || ''
+                };
+            }
 
-        // If user doesn't exist in demo-store but matches logged-in user, create them
-        // Note: We check against targetUsername here (which is authUser.username if aliased)
-        if (!userData && authUser && authUser.username === targetUsername) {
-            // Create demo-store entry for the logged-in user
-            demoStore.addUser({
-                id: authUser.id,
-                username: authUser.username,
-                avatarUrl: authUser.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.username}`,
-                bio: authUser.bio || 'My personal fashion archive.'
-            });
-            userData = demoStore.getUser(targetUsername);
-        }
+            if (userData) {
+                const userPosts = await demoStore.getPostsByUsername(targetUsername);
+                setUser(userData);
+                setPosts(userPosts);
+            }
+            setLoading(false);
+        };
 
-        if (userData) {
-            setUser(userData);
-            setPosts(demoStore.getPostsByUsername(targetUsername));
-        }
-        setLoading(false);
-    }, [username, authUser]);
+        loadData();
+    }, [username, authUser, router]);
 
     if (loading) {
         return (

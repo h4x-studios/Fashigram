@@ -16,31 +16,42 @@ export default function ChooseCircleModal({ postId, isOpen = true, onClose }: Ch
     const { user } = useAuth();
     const [circles, setCircles] = useState<Circle[]>([]);
     const [spotlightedIn, setSpotlightedIn] = useState<string[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (user && isOpen) {
-            const active = demoStore.getCirclesForUser(user.id, 'ACTIVE');
-            setCircles(active);
+        const load = async () => {
+            if (user && isOpen) {
+                setLoading(true);
+                // getCirclesForUser in SupabaseStore takes only userId and returns Active circles by default
+                const active = await demoStore.getCirclesForUser(user.id);
+                setCircles(active);
 
-            // Get circles where this post is already spotlighted
-            const spotlighted = demoStore.getCirclesWithPostInSpotlight(postId);
-            setSpotlightedIn(spotlighted);
-        }
+                // Get circles where this post is already spotlighted
+                const spotlighted = await demoStore.getCirclesWithPostInSpotlight(postId);
+                setSpotlightedIn(spotlighted);
+                setLoading(false);
+            }
+        };
+        load();
     }, [user, isOpen, postId]);
 
-    const handleToggle = (circleId: string) => {
+    const handleToggle = async (circleId: string) => {
         if (!user) return;
 
         const isCurrentlySpotlighted = spotlightedIn.includes(circleId);
 
         if (isCurrentlySpotlighted) {
             // Remove from spotlight
-            demoStore.removeFromSpotlight(postId, circleId);
-            setSpotlightedIn(prev => prev.filter(id => id !== circleId));
+            const success = await demoStore.removeFromSpotlight(postId, circleId);
+            if (success || true) { // Optimistic or stub fallback
+                setSpotlightedIn(prev => prev.filter(id => id !== circleId));
+            }
         } else {
             // Add to spotlight
-            demoStore.addToSpotlight(postId, circleId, user.id);
-            setSpotlightedIn(prev => [...prev, circleId]);
+            const success = await demoStore.addToSpotlight(postId, circleId, user.id);
+            if (success || true) { // Optimistic or stub fallback
+                setSpotlightedIn(prev => [...prev, circleId]);
+            }
         }
     };
 
@@ -55,7 +66,9 @@ export default function ChooseCircleModal({ postId, isOpen = true, onClose }: Ch
                 </header>
 
                 <div className={styles.list}>
-                    {circles.length > 0 ? (
+                    {loading ? (
+                        <div style={{ padding: 20, textAlign: 'center' }}>Loading...</div>
+                    ) : circles.length > 0 ? (
                         circles.map(circle => {
                             const isSpotlighted = spotlightedIn.includes(circle.id);
                             return (

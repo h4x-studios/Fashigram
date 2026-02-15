@@ -1,15 +1,25 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../../supabase/config'; // Adjust path if needed
 import styles from '../auth.module.css';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 export default function LoginPage() {
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user && !authLoading) {
+            router.push('/');
+        }
+    }, [user, authLoading, router]);
 
     // Form State
     const [email, setEmail] = useState('');
@@ -45,11 +55,13 @@ export default function LoginPage() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
-                redirectTo: `${window.location.origin}`,
+                redirectTo: `${window.location.origin}/`,
             },
         });
-        if (error) setError(error.message);
-        // OAuth will redirect away
+        if (error) {
+            setError(error.message);
+            setLoading(false);
+        }
     };
 
     return (

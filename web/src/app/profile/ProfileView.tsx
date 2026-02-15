@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./profile.module.css";
@@ -18,8 +18,6 @@ import {
     ArrowLeftIcon
 } from "../components/Icons";
 
-
-
 interface ProfileViewProps {
     user: User;
     posts: PostData[];
@@ -30,23 +28,51 @@ export default function ProfileView({ user, posts, isOwner = false }: ProfileVie
     const router = useRouter();
     const [styleFilter, setStyleFilter] = useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    // Toggle removed as per user request (always include suggested/all tags)
+
+    // Cache suggested styles for filtering. Map<PostId, SuggestedStyles[]>
+    const [suggestionsMap, setSuggestionsMap] = useState<Record<string, string[]>>({});
+    const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+
+    // Load suggested styles for all posts
+    useEffect(() => {
+        const loadSuggestions = async () => {
+            setLoadingSuggestions(true);
+            const map: Record<string, string[]> = {};
+            // Parallel fetch
+            await Promise.all(posts.map(async (post) => {
+                const suggested = await demoStore.getSuggestedStylesForPost(post.id, post.style);
+                map[post.id] = suggested;
+            }));
+            setSuggestionsMap(map);
+            setLoadingSuggestions(false);
+        };
+
+        if (posts.length > 0) {
+            loadSuggestions();
+        } else {
+            setLoadingSuggestions(false);
+        }
+    }, [posts]);
 
     // Filter Logic
     const filteredPosts = useMemo(() => {
         if (!styleFilter) return posts;
+        if (loadingSuggestions && posts.length > 0) return []; // Wait for loading? Or show declared only?
+        // Show declared only implies "No results" until loaded. 
+        // Better: Show declared matches immediately, add suggested matches when loaded?
+        // Simpler: Just filter.
 
         return posts.filter(post => {
             // 1. Check declared style
             if (post.style === styleFilter) return true;
 
-            // 2. Check suggested styles (Always include per new requirement)
-            const suggested = demoStore.getSuggestedStylesForPost(post.id, post.style);
+            // 2. Check suggested styles
+            const suggested = suggestionsMap[post.id] || [];
             if (suggested.includes(styleFilter)) return true;
 
             return false;
         });
-    }, [posts, styleFilter]);
+    }, [posts, styleFilter, suggestionsMap, loadingSuggestions]);
 
     return (
         <div className={styles.container}>

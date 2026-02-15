@@ -25,18 +25,35 @@ import {
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
+
+  // Prompt for username if it is still a placeholder (e.g. Google Login fallback)
+  useEffect(() => {
+    if (user?.is_placeholder_username) {
+      router.push("/auth/setup");
+    }
+  }, [user, router]);
+
   const [activeTab, setActiveTab] = useState<'new' | 'top'>('new');
   const [styleFilter, setStyleFilter] = useState<string | null>(null);
   const [substyleFilter, setSubstyleFilter] = useState<string | null>(null);
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
+
+  // Data State
+  const [allPosts, setAllPosts] = useState<PostData[]>([]);
   const [posts, setPosts] = useState<PostData[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Seed demo posts on first load
+  // Initial Fetch
   useEffect(() => {
-    if (demoStore.getAllPosts().length === 0) {
-      demoStore.seedDemoPosts();
-    }
+    const init = async () => {
+      setLoading(true);
+      const fetched = await demoStore.getAllPosts();
+      setAllPosts(fetched);
+      setLoading(false);
+    };
+    init();
   }, []);
 
   // STORY 5: Reset substyle when style changes
@@ -45,53 +62,61 @@ export default function Home() {
     setSubstyleFilter(null); // Always reset substyle
   };
 
-  // Calculate Top Score (using existing demo logic for now)
-  function calculateTopScore(post: PostData): number {
-    const declaredVotes = demoStore.getVoteCountForStyle(post.id, post.style);
+  // Calculate Top Score (Async Wrapper)
+  async function calculateTopScore(post: PostData): Promise<number> {
+    const declaredVotes = await demoStore.getVoteCountForStyle(post.id, post.style);
     const hoursOld = (Date.now() - new Date(post.createdAt).getTime()) / (1000 * 60 * 60);
     const timeDecay = 1 / Math.log10(hoursOld + 10);
     return declaredVotes * timeDecay;
   }
 
-  // Fetch and filter posts
+  // Filter and Sort Effect
   useEffect(() => {
-    let allPosts = demoStore.getAllPosts();
+    const applyFilters = async () => {
+      let current = [...allPosts];
 
-    // STORY 1 & STORY 4: Apply style filter first
-    if (styleFilter) {
-      allPosts = allPosts.filter(p => p.style === styleFilter);
+      // STORY 1 & STORY 4: Apply style filter
+      if (styleFilter) {
+        current = current.filter(p => p.style === styleFilter);
+      }
+
+      // STORY 4: Apply substyle filter
+      if (styleFilter && substyleFilter) {
+        current = current.filter(p => p.substyle === substyleFilter);
+      }
+
+      // Apply country filter
+      if (countryFilter) {
+        current = current.filter(p => p.countryName === countryFilter);
+      }
+
+      // Sort
+      if (activeTab === 'new') {
+        current.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      } else {
+        // Top: calculate scores async
+        const scored = await Promise.all(current.map(async p => ({
+          post: p,
+          score: await calculateTopScore(p)
+        })));
+
+        scored.sort((a, b) => b.score - a.score);
+        current = scored.map(s => s.post);
+      }
+
+      setPosts(current);
+    };
+
+    if (!loading) {
+      applyFilters();
     }
+  }, [allPosts, activeTab, styleFilter, substyleFilter, countryFilter, loading]);
 
-    // STORY 4: Apply substyle filter (only if style is selected)
-    if (styleFilter && substyleFilter) {
-      allPosts = allPosts.filter(p => p.substyle === substyleFilter);
-    }
-
-    // Apply country filter
-    if (countryFilter) {
-      allPosts = allPosts.filter(p => p.countryName === countryFilter);
-    }
-
-    // Sort based on active tab
-    if (activeTab === 'new') {
-      allPosts.sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-    } else {
-      // Top: calculate scores
-      const scored = allPosts.map(p => ({
-        post: p,
-        score: calculateTopScore(p)
-      })).sort((a, b) => b.score - a.score);
-      allPosts = scored.map(s => s.post);
-    }
-
-    setPosts(allPosts);
-  }, [activeTab, styleFilter, substyleFilter, countryFilter]);
-
-  // Get unique countries from posts
+  // Get unique countries from ALL posts
   const countries = Array.from(new Set(
-    demoStore.getAllPosts()
+    allPosts
       .map(p => p.countryName)
       .filter((c): c is string => !!c && c !== 'Everywhere')
   )).sort();
@@ -193,7 +218,11 @@ export default function Home() {
 
       {/* Post Grid */}
       <main className={styles.feedGrid}>
-        {posts.length === 0 ? (
+        {loading ? (
+          <div className={styles.emptyState}>
+            <p>Loading...</p>
+          </div>
+        ) : posts.length === 0 ? (
           <div className={styles.emptyState}>
             <p>No posts match your filters</p>
             <button onClick={() => {

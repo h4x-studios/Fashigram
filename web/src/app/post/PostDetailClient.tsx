@@ -8,6 +8,7 @@ import { demoStore, PostData, StyleVote } from "../demo-store";
 import StyleChip from "./StyleChip";
 import StyleSuggestionModal from "./StyleSuggestionModal";
 import Sidebar from "../components/Sidebar";
+import { useAuth } from "../contexts/AuthContext";
 import {
     HomeIcon,
     PlusIcon,
@@ -22,6 +23,7 @@ const MAX_SUGGESTIONS = 2;
 
 export default function PostDetailView({ id }: { id: string }) {
     const router = useRouter();
+    const { user } = useAuth();
     const [post, setPost] = useState<PostData | null>(null);
     const [votes, setVotes] = useState<StyleVote[]>([]);
     const [suggestedStyles, setSuggestedStyles] = useState<string[]>([]);
@@ -36,82 +38,111 @@ export default function PostDetailView({ id }: { id: string }) {
 
     // Initial Data Load
     useEffect(() => {
-        const storedPost = demoStore.getPost(id);
-        if (storedPost) {
-            setPost(storedPost);
-        } else {
-            // Fallback for direct link/refresh
-            setPost({
-                id,
-                username: "CherryPop",
-                avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Cherry",
-                countryName: "United States",
-                images: [
-                    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80",
-                    "https://images.unsplash.com/photo-1539109132384-36155575239b?w=400&q=80",
-                    "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=400&q=80"
-                ],
-                style: "Decora",
-                caption: "Feeling super kawaii in this Decora outfit! I love mixing bright colors and cute accessories!",
-                createdAt: "2 hours ago"
-            });
-        }
+        const fetchPost = async () => {
+            const storedPost = await demoStore.getPost(id);
+            if (storedPost) {
+                setPost(storedPost);
+            }
+        };
+        fetchPost();
     }, [id]);
 
     // Vote Data Sync
-    // Wrapped in useCallback if needed, but here simple function is fine as it's called in effects
-    const refreshVotes = () => {
-        if (!post) return;
-
-        // Ensure declared vote exists
-        if (!demoStore.areVotesInitialized(id)) {
-            demoStore.addVote({
-                postId: id,
-                style: post.style,
-                userId: post.username === "You" ? demoStore.getCurrentUserId() : "creator",
-                voteType: 'DECLARED',
-                createdAt: new Date().toISOString()
-            });
-        }
-
-        const currentVotes = demoStore.getVotesForPost(id);
-        const currentSuggestions = demoStore.getSuggestedStylesForPost(id, post.style);
-
-        const userId = demoStore.getCurrentUserId();
-        const myVotes = new Set(currentVotes.filter(v => v.userId === userId).map(v => v.style));
-
-        setVotes(currentVotes);
-        setSuggestedStyles(currentSuggestions);
-        setUserVotes(myVotes);
-    };
-
     useEffect(() => {
-        if (post) refreshVotes();
-    }, [post]);
+        const refreshVotes = async () => {
+            if (!post) return;
+
+            const currentVotes = await demoStore.getVotesForPost(id);
+
+            // Client-side aggregate for suggestions
+            const suggestionsMap: Record<string, number> = {};
+            currentVotes.forEach(v => {
+                if (v.voteType === 'SUGGESTED' && v.style !== post.style) {
+                    suggestionsMap[v.style] = (suggestionsMap[v.style] || 0) + 1;
+                }
+            });
+
+            // Sort suggestions by count
+            const sortedSuggestions = Object.keys(suggestionsMap)
+                .sort((a, b) => suggestionsMap[b] - suggestionsMap[a]);
+
+            // Determine user's votes
+            const myVotes = new Set<string>();
+            if (user) {
+                currentVotes.filter(v => v.userId === user.id).forEach(v => myVotes.add(v.style));
+            }
+
+            setVotes(currentVotes);
+            setSuggestedStyles(sortedSuggestions);
+            setUserVotes(myVotes);
+        };
+
+        refreshVotes();
+    }, [post, id, user]);
 
     // Handlers
-    const handleVote = (style: string, voteType: 'DECLARED' | 'SUGGESTED') => {
-        const userId = demoStore.getCurrentUserId();
+    const handleVote = async (style: string, voteType: 'DECLARED' | 'SUGGESTED') => {
+        if (!user) {
+            setError("You must be logged in to vote.");
+            return;
+        }
 
         // Toggle Vote Logic
-        if (demoStore.hasUserVotedForStyle(id, style, userId)) {
+        // We use client state 'userVotes' to check existence, or check DB?
+        // Checking DB is safer (race conditions), but client state is faster.
+        // demoStore.hasUserVotedForStyle is gone (sync).
+        // relying on userVotes set.
+
+        if (userVotes.has(style)) {
             // Unvote
-            demoStore.removeVote(id, style, userId);
-            refreshVotes();
+            await demoStore.removeVote(id, style, user.id);
+            // Refresh logic will re-fetch
+            const currentVotes = await demoStore.getVotesForPost(id);
+            // ... update state (duplicate logic from effect? Or trigger effect?)
+            // Triggering effect by dependent variable is tricky if nothing changed in dependencies.
+            // Better to update state manually or extract refresh function.
+            // I'll inline a quick refresh or extract it outside effect?
+            // Extracting `refreshVotes` outside isn't easy with `useEffect`.
+            // I'll just force re-fetch or assume `setVotes` updates.
+            const suggestionsMap: Record<string, number> = {};
+            currentVotes.forEach(v => {
+                if (v.voteType === 'SUGGESTED' && v.style !== post?.style) {
+                    suggestionsMap[v.style] = (suggestionsMap[v.style] || 0) + 1;
+                }
+            });
+            const sortedSuggestions = Object.keys(suggestionsMap).sort((a, b) => suggestionsMap[b] - suggestionsMap[a]);
+            const myVotes = new Set<string>();
+            currentVotes.filter(v => v.userId === user.id).forEach(v => myVotes.add(v.style));
+            setVotes(currentVotes);
+            setSuggestedStyles(sortedSuggestions);
+            setUserVotes(myVotes);
             return;
         }
 
         // Add Vote
-        const success = demoStore.addVote({
+        const success = await demoStore.addVote({
             postId: id,
             style: style,
-            userId,
+            userId: user.id,
             voteType,
             createdAt: new Date().toISOString()
         });
 
         if (success) {
-            refreshVotes();
+            // Refresh (inline for now)
+            const currentVotes = await demoStore.getVotesForPost(id);
+            const suggestionsMap: Record<string, number> = {};
+            currentVotes.forEach(v => {
+                if (v.voteType === 'SUGGESTED' && v.style !== post?.style) {
+                    suggestionsMap[v.style] = (suggestionsMap[v.style] || 0) + 1;
+                }
+            });
+            const sortedSuggestions = Object.keys(suggestionsMap).sort((a, b) => suggestionsMap[b] - suggestionsMap[a]);
+            const myVotes = new Set<string>();
+            currentVotes.filter(v => v.userId === user.id).forEach(v => myVotes.add(v.style));
+            setVotes(currentVotes);
+            setSuggestedStyles(sortedSuggestions);
+            setUserVotes(myVotes);
         } else {
             setError('Failed to record vote');
         }
@@ -138,13 +169,15 @@ export default function PostDetailView({ id }: { id: string }) {
         setIsModalOpen(false);
     };
 
-    if (!post) return null;
+    if (!post) return <div>Loading...</div>; // Or return null
 
     const galleryClass = post.images.length === 1 ? styles.gallery1 :
         post.images.length === 2 ? styles.gallery2 :
             styles.gallery3;
 
-    const declaredCount = demoStore.getVoteCountForStyle(id, post.style) || 1;
+    // We need declared count.
+    // Calculate from `votes` state.
+    const declaredCount = votes.filter(v => v.style === post.style).length || 1;
 
     return (
         <>
@@ -216,7 +249,7 @@ export default function PostDetailView({ id }: { id: string }) {
                             <StyleChip
                                 key={s}
                                 label={s}
-                                count={demoStore.getVoteCountForStyle(id, s)}
+                                count={votes.filter(v => v.style === s).length}
                                 isDeclared={false}
                                 isVoted={userVotes.has(s)}
                                 onClick={() => handleVote(s, 'SUGGESTED')}
@@ -243,7 +276,8 @@ export default function PostDetailView({ id }: { id: string }) {
                     <div className={styles.location}>
                         <span>📍 {post.countryName || "Everywhere"}</span>
                         <span>•</span>
-                        <span>{post.createdAt}</span>
+                        <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                        {/* Changed relative time to date string for simplicity or keep logic if imported */}
                     </div>
                 </section>
 

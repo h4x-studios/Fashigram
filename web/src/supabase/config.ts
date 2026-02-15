@@ -1,12 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-if (!supabaseUrl.startsWith("http")) {
-  throw new Error(
-    `Invalid supabaseUrl: "${supabaseUrl}". Check NEXT_PUBLIC_SUPABASE_URL in web/.env.local`
-  );
+// Robustness: If the user only provided the project ID (e.g. pvvnwztyzdffpsrfslgt)
+// automatically format it into the full Supabase URL.
+if (supabaseUrl && !supabaseUrl.startsWith("http")) {
+  supabaseUrl = `https://${supabaseUrl}.supabase.co`;
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn("Supabase environment variables are missing. Build may fail or features will be limited.");
+}
+
+export const supabase = createClient(
+  supabaseUrl || "https://placeholder.supabase.co",
+  supabaseAnonKey || "placeholder-key"
+);

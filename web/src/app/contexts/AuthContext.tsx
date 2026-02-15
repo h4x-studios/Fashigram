@@ -10,6 +10,7 @@ export interface AppUser {
     username: string; // From metadata or specific table
     avatar_url?: string;
     bio?: string;
+    is_placeholder_username: boolean;
 }
 
 interface AuthContextType {
@@ -41,31 +42,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .single();
 
             if (profile) {
+                // Check if the username looks like a default generated one (e.g. user_abcdef12)
+                const isPlaceholder = profile.username.startsWith('user_');
+
                 setUser({
                     id: authUser.id,
                     email: authUser.email,
-                    username: profile.username || authUser.user_metadata?.username || 'user',
+                    username: profile.username,
                     avatar_url: profile.avatar_url,
-                    bio: profile.bio
+                    bio: profile.bio,
+                    is_placeholder_username: isPlaceholder
                 });
             } else {
-                // Fallback if no profile record exists yet (e.g. freshly signed up via Auth only)
-                // Ideally we create the record on signup, but being robust is good.
+                // Fallback if no profile record exists yet
+                // Note: The SQL trigger should eventually create this, 
+                // but we handle the intermediate state here.
+                const tempUsername = authUser.user_metadata?.username || 'user_' + authUser.id.substring(0, 8);
+
                 setUser({
                     id: authUser.id,
                     email: authUser.email,
-                    username: authUser.user_metadata?.preferred_username || authUser.email?.split('@')[0] || 'user',
+                    username: tempUsername,
                     avatar_url: authUser.user_metadata?.avatar_url,
-                    bio: ''
+                    bio: '',
+                    is_placeholder_username: true
                 });
             }
         } catch (e) {
             console.error("Error fetching profile", e);
-            // Minimal fallback
             setUser({
                 id: authUser.id,
                 email: authUser.email,
-                username: 'user',
+                username: 'user_' + authUser.id.substring(0, 8),
+                is_placeholder_username: true
             });
         } finally {
             setLoading(false);
