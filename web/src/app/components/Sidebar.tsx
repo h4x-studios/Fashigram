@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './Sidebar.module.css';
 import { UserIcon } from './Icons';
-import CircleIcon from './CircleIcon'; // Added import
+import CircleIcon from './CircleIcon';
 import Logo from './Logo';
 
 interface SidebarProps {
@@ -39,9 +39,14 @@ const LoginIcon = () => (
 );
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
     const { user, signOut } = useAuth();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Close on Escape key
     useEffect(() => {
@@ -81,12 +86,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     // Check if we're on the profile page
     const isProfileActive = pathname?.startsWith('/profile');
     const isCirclesActive = pathname?.startsWith('/circles');
-    const isSettingsActive = pathname?.startsWith('/settings');
 
+    if (!mounted || !isOpen) return null;
 
-    if (!isOpen) return null;
-
-    return (
+    return createPortal(
         <>
             {/* Scrim/Overlay */}
             <div
@@ -158,6 +161,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     )}
                 </nav>
             </div>
-        </>
+        </>,
+        document.body
     );
 }
