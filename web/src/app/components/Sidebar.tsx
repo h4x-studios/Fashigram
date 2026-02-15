@@ -105,15 +105,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                 <nav className={styles.menu}>
                     {/* Profile */}
-                    <button
-                        className={`${styles.menuItem} ${isProfileActive ? styles.menuItemActive : ''}`}
-                        onClick={() => handleNavigation(user ? `/profile/You` : '/auth/login')}
-                    >
-                        <span className={`${styles.menuIcon} ${isProfileActive ? styles.menuIconActive : styles.menuIconInactive}`}>
-                            <UserIcon filled />
-                        </span>
-                        Profile
-                    </button>
+                    {user && (
+                        <button
+                            className={`${styles.menuItem} ${isProfileActive ? styles.menuItemActive : ''}`}
+                            onClick={() => handleNavigation(`/profile/You`)}
+                        >
+                            <span className={`${styles.menuIcon} ${isProfileActive ? styles.menuIconActive : styles.menuIconInactive}`}>
+                                <UserIcon filled />
+                            </span>
+                            Profile
+                        </button>
+                    )}
 
                     {/* Circles */}
                     <button
