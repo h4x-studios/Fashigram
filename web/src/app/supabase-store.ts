@@ -268,6 +268,18 @@ export class SupabaseStore {
         return data;
     }
 
+    async updateCircle(circleId: string, name: string, description: string | undefined): Promise<boolean> {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
+
+        const { error } = await supabase
+            .from('circles')
+            .update({ name, description, updated_at: new Date().toISOString() })
+            .match({ id: circleId, owner_user_id: user.id });
+
+        return !error;
+    }
+
     async getCircleMembers(circleId: string, status: 'ACTIVE' | 'INVITED' = 'ACTIVE'): Promise<CircleMember[]> {
         const { data, error } = await supabase
             .from('circle_members')
