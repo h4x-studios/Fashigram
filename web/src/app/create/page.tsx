@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { demoStore } from "../demo-store";
 import { useAuth } from "../contexts/AuthContext";
 import styles from "./create.module.css";
-import { ArrowLeftIcon } from "../components/Icons";
-import Logo from "../components/Logo";
 
 import { STYLES } from "../data/styles";
 import { useSupabaseUpload } from "@/hooks/useSupabaseUpload";
@@ -350,15 +348,7 @@ export default function CreatePost() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <button className={styles.backButton} onClick={() => router.back()}>
-                    <ArrowLeftIcon />
-                </button>
-                <div className={styles.logoContainer}>
-                    <Logo variant="icon" size={64} clickable={false} />
-                </div>
-                <div style={{ width: 40 }}></div>
-            </header>
+            {/* Image Upload */}
 
             {/* Image Upload */}
             <label className={styles.uploadSection}>

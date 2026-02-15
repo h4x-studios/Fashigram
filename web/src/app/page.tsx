@@ -9,11 +9,7 @@ import PostTile from "./feed/PostTile";
 import { ALL_STYLES, getSubstylesForStyle, hasSubstyles } from "./data/styles";
 import FilterDropdown from "./feed/FilterDropdown";
 import { useAuth } from "./contexts/AuthContext";
-import Sidebar from "./components/Sidebar";
-import Logo from "./components/Logo";
 import {
-  MenuIcon,
-  SearchIcon,
   HomeIcon,
   PlusIcon,
   UserIcon,
@@ -127,17 +123,6 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-      {/* Header */}
-      <header className={styles.header}>
-        <button className={styles.menuButton} onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
-        <div className={styles.logoContainer}>
-          <Logo variant="full" size={64} />
-        </div>
-        <button className={styles.searchButton}><SearchIcon /></button>
-      </header>
-
       {/* Tab Switcher */}
       <div className={styles.tabs}>
         <button
@@ -243,20 +228,6 @@ export default function Home() {
           ))
         )}
       </main>
-
-      {/* Bottom Navigation */}
-      <nav className={styles.navbar}>
-        <div className={`${styles.navIcon} ${styles.navIconActive}`}><HomeIcon filled /></div>
-        <Link href={user ? "/create" : "/auth/login"} className={styles.createButton}>
-          <PlusIcon />
-        </Link>
-        <Link
-          href={user ? `/profile/You` : "/auth/login"}
-          className={styles.navIcon}
-        >
-          <UserIcon filled className={styles.navUserIcon} />
-        </Link>
-      </nav>
     </div>
   );
 }

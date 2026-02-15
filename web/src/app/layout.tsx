@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google"; // Using Outfit as requested
 import "./globals.css";
 import { AuthProvider } from "./contexts/AuthContext";
 import BottomNav from "./components/BottomNav";
+import GlobalHeader from "./components/GlobalHeader";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={outfit.variable}>
         <AuthProvider>
+          <GlobalHeader />
           {children}
           <BottomNav />
         </AuthProvider>

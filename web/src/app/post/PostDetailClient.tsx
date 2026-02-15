@@ -7,7 +7,6 @@ import Link from "next/link";
 import { demoStore, PostData, StyleVote } from "../demo-store";
 import StyleChip from "./StyleChip";
 import StyleSuggestionModal from "./StyleSuggestionModal";
-import Sidebar from "../components/Sidebar";
 import { useAuth } from "../contexts/AuthContext";
 import {
     HomeIcon,
@@ -18,7 +17,6 @@ import {
 } from "../components/Icons";
 import ChooseCircleModal from "../components/ChooseCircleModal";
 import CircleIcon from "../components/CircleIcon";
-import Logo from "../components/Logo";
 
 const MAX_SUGGESTIONS = 2;
 
@@ -34,7 +32,6 @@ export default function PostDetailView({ id }: { id: string }) {
 
     // UI State
     const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSpotlightModalOpen, setIsSpotlightModalOpen] = useState(false);
 
     // Initial Data Load
@@ -195,19 +192,6 @@ export default function PostDetailView({ id }: { id: string }) {
 
     return (
         <>
-            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-            {/* Header */}
-            <header className={styles.header}>
-                <button className={styles.backButton} onClick={() => router.back()}>
-                    <ArrowLeftIcon />
-                </button>
-                <div className={styles.logoContainer}>
-                    <Logo variant="icon" size={64} clickable={false} />
-                </div>
-                <div style={{ width: 40 }}></div>
-            </header>
-
             <ChooseCircleModal
                 postId={post.id}
                 isOpen={isSpotlightModalOpen}

@@ -72,7 +72,6 @@ export default function SignupPage() {
     return (
         <div className={styles.container}>
             <div className={styles.card}>
-                <h1 className={styles.logo}>Fashigram</h1>
                 <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '24px', color: '#555' }}>Create Account</h2>
 
                 {error && <div className={styles.error}>{error}</div>}

@@ -67,7 +67,6 @@ export default function LoginPage() {
     return (
         <div className={styles.container}>
             <div className={styles.card}>
-                <h1 className={styles.logo}>Fashigram</h1>
 
                 {error && <div className={styles.error}>{error}</div>}
 
