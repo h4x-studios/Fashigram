@@ -37,10 +37,7 @@ export default function CircleView({ circleId }: { circleId: string }) {
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, marginLeft: -8 }}>
-                    <ArrowLeftIcon />
-                </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     <CircleIcon size={64} staticIcon />
                     <div>
                         <h1 className={styles.title}>{circle.name}</h1>

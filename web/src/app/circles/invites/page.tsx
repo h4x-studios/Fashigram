@@ -32,10 +32,7 @@ export default function CircleInvitesPage() {
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, marginLeft: -8 }}>
-                    <ArrowLeftIcon />
-                </button>
-                <h1 className={styles.title} style={{ marginTop: 16 }}>Pending Invites</h1>
+                <h1 className={styles.title}>Pending Invites</h1>
             </header>
 
             <div className={styles.list} style={{ marginTop: 24 }}>

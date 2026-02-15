@@ -32,14 +32,7 @@ export default function CreateCirclePage() {
 
     return (
         <div className={styles.container}>
-            <header className={styles.header}>
-                <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, marginLeft: -8 }}>
-                    <ArrowLeftIcon />
-                </button>
-                <h1 className={styles.title} style={{ marginTop: 16 }}>Create New Circle</h1>
-            </header>
-
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20, marginTop: 24 }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20, paddingTop: 20 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <label style={{ fontSize: 13, fontWeight: 700, color: '#666', textTransform: 'uppercase' }}>Circle Name</label>
                     <input

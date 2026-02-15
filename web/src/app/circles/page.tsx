@@ -7,12 +7,14 @@ import { demoStore, Circle, CircleMember } from '../demo-store';
 import styles from './circles.module.css';
 import CircleIcon from '../components/CircleIcon';
 import { PlusIcon } from '../components/Icons';
+import CreateCircleModal from '../components/CreateCircleModal';
 
 export default function CirclesPage() {
     const { user } = useAuth();
     const [circles, setCircles] = useState<Circle[]>([]);
     const [invites, setInvites] = useState<CircleMember[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     useEffect(() => {
         const load = async () => {
@@ -82,11 +84,19 @@ export default function CirclesPage() {
 
             {/* Create FAB */}
             <div className={styles.createButtonContainer}>
-                <Link href="/circles/create" className={styles.createButton}>
+                <button
+                    className={styles.createButton}
+                    onClick={() => setIsCreateModalOpen(true)}
+                >
                     <PlusIcon />
                     Create New Circle
-                </Link>
+                </button>
             </div>
+
+            <CreateCircleModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+            />
         </div>
     );
 }
