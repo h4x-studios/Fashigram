@@ -215,7 +215,7 @@ export class SupabaseStore {
         return Object.keys(suggestionsMap).sort((a, b) => suggestionsMap[b] - suggestionsMap[a]);
     }
 
-    // Circles (Missing tables implemented per plan)
+    // Circles Implementation
     async getCirclesForUser(userId: string): Promise<Circle[]> {
         const { data, error } = await supabase
             .from('circle_members')
@@ -227,18 +227,139 @@ export class SupabaseStore {
         return data.map((d: any) => d.circles).filter(Boolean);
     }
 
-    // Stubs for build compatibility
     async createCircle(name: string, description: string | undefined, ownerUserId: string): Promise<Circle> {
-        return { id: 'new', owner_user_id: ownerUserId, name, description, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+        const { data: circle, error: circleError } = await supabase
+            .from('circles')
+            .insert({
+                name,
+                description,
+                owner_user_id: ownerUserId
+            })
+            .select()
+            .single();
+
+        if (circleError) throw circleError;
+
+        // Automatically add owner as ACTIVE member
+        const { error: memberError } = await supabase
+            .from('circle_members')
+            .insert({
+                circle_id: circle.id,
+                user_id: ownerUserId,
+                role: 'OWNER',
+                status: 'ACTIVE',
+                invited_by_user_id: ownerUserId,
+                joined_at: new Date().toISOString()
+            });
+
+        if (memberError) throw memberError;
+
+        return circle;
     }
-    async getCircle(circleId: string): Promise<Circle | null> { return null; }
-    async getCircleMembers(circleId: string, status?: 'ACTIVE' | 'INVITED'): Promise<CircleMember[]> { return []; }
-    async isCircleMember(circleId: string, userId: string): Promise<boolean> { return false; }
-    async inviteToCircle(circleId: string, username: string, invitedByUserId: string): Promise<boolean> { return false; }
-    async addToSpotlight(postId: string, circleId: string, userId: string): Promise<boolean> { return false; }
-    async removeFromSpotlight(postId: string, circleId: string): Promise<boolean> { return false; }
-    async getCirclesWithPostInSpotlight(postId: string): Promise<string[]> { return []; }
-    async getSpotlightPostsForCircle(circleId: string): Promise<PostData[]> { return []; }
+
+    async getCircle(circleId: string): Promise<Circle | null> {
+        const { data, error } = await supabase
+            .from('circles')
+            .select('*')
+            .eq('id', circleId)
+            .single();
+
+        if (error) return null;
+        return data;
+    }
+
+    async getCircleMembers(circleId: string, status: 'ACTIVE' | 'INVITED' = 'ACTIVE'): Promise<CircleMember[]> {
+        const { data, error } = await supabase
+            .from('circle_members')
+            .select('*')
+            .eq('circle_id', circleId)
+            .eq('status', status);
+
+        if (error) return [];
+        return data;
+    }
+
+    async isCircleMember(circleId: string, userId: string): Promise<boolean> {
+        const { count } = await supabase
+            .from('circle_members')
+            .select('*', { count: 'exact', head: true })
+            .match({ circle_id: circleId, user_id: userId, status: 'ACTIVE' });
+
+        return (count || 0) > 0;
+    }
+
+    async inviteToCircle(circleId: string, username: string, invitedByUserId: string): Promise<boolean> {
+        // 1. Get user by username
+        const user = await this.getUser(username);
+        if (!user) return false;
+
+        // 2. Insert invite
+        const { error } = await supabase
+            .from('circle_members')
+            .insert({
+                circle_id: circleId,
+                user_id: user.id,
+                role: 'MEMBER',
+                status: 'INVITED',
+                invited_by_user_id: invitedByUserId
+            });
+
+        return !error;
+    }
+
+    async addToSpotlight(postId: string, circleId: string, userId: string): Promise<boolean> {
+        const { error } = await supabase
+            .from('spotlight_entries')
+            .insert({
+                post_id: postId,
+                circle_id: circleId,
+                added_by_user_id: userId
+            });
+
+        return !error;
+    }
+
+    async removeFromSpotlight(postId: string, circleId: string): Promise<boolean> {
+        const { error } = await supabase
+            .from('spotlight_entries')
+            .delete()
+            .match({ post_id: postId, circle_id: circleId });
+
+        return !error;
+    }
+
+    async getCirclesWithPostInSpotlight(postId: string): Promise<string[]> {
+        const { data, error } = await supabase
+            .from('spotlight_entries')
+            .select('circle_id')
+            .eq('post_id', postId);
+
+        if (error || !data) return [];
+        return data.map(d => d.circle_id);
+    }
+
+    async getSpotlightPostsForCircle(circleId: string): Promise<PostData[]> {
+        const { data, error } = await supabase
+            .from('spotlight_entries')
+            .select(`
+                posts(
+                    *,
+                    user:users(username, avatar_url),
+                    post_images(url, order_index)
+                )
+            `)
+            .eq('circle_id', circleId);
+
+        if (error || !data) return [];
+
+        return data.map((d: any) => {
+            const p = d.posts;
+            if (p.post_images) {
+                p.post_images.sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0));
+            }
+            return mapPost(p);
+        });
+    }
 }
 
 export const supabaseStore = new SupabaseStore();
