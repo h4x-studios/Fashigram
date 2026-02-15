@@ -81,13 +81,17 @@ export class SupabaseStore {
             const imageInserts = post.images.map((url, idx) => ({
                 post_id: postData.id,
                 url: url,
+                storage_path: post.imagePaths?.[idx] || url.split('/').pop() || 'unknown',
                 order_index: idx
             }));
 
             const { error: imgError } = await supabase
                 .from('post_images')
                 .insert(imageInserts);
-            if (imgError) console.error("Error saving images", imgError);
+            if (imgError) {
+                console.error("Error saving images", imgError);
+                throw new Error("Failed to save post images: " + imgError.message);
+            }
         }
 
         await this.addVote({

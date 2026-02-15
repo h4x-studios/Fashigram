@@ -8,6 +8,7 @@ export interface PostData {
     avatarUrl?: string; // from user profile
     countryName?: string;
     images: string[];
+    imagePaths?: string[]; // Optional storage paths
     style: string; // declared_genre
     substyle?: string;
     caption?: string;

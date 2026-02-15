@@ -260,6 +260,7 @@ export default function CreatePost() {
     const { user } = useAuth();
     const { uploadFile, isUploading } = useSupabaseUpload();
     const [images, setImages] = useState<string[]>([]);
+    const [imagePaths, setImagePaths] = useState<string[]>([]);
     const [style, setStyle] = useState("");
     const [caption, setCaption] = useState("");
     const [country, setCountry] = useState("");
@@ -269,9 +270,10 @@ export default function CreatePost() {
             if (images.length >= 3) return;
             const file = e.target.files[0];
 
-            const publicUrl = await uploadFile(file);
-            if (publicUrl) {
-                setImages([...images, publicUrl]);
+            const result = await uploadFile(file);
+            if (result) {
+                setImages([...images, result.url]);
+                setImagePaths([...imagePaths, result.path]);
             }
         }
     };
@@ -324,6 +326,7 @@ export default function CreatePost() {
                 avatarUrl: user?.avatar_url,
                 countryName: countryName,
                 images: images,
+                imagePaths: imagePaths,
                 style: style,
                 caption: caption,
                 createdAt: new Date().toISOString()

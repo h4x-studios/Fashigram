@@ -3,17 +3,19 @@ import { supabase } from '@/supabase/config';
 
 interface UploadResult {
     url: string | null;
+    path: string | null;
     error: string | null;
     isUploading: boolean;
-    uploadFile: (file: File) => Promise<string | null>;
+    uploadFile: (file: File) => Promise<{ url: string; path: string } | null>;
 }
 
 export const useSupabaseUpload = (bucketName: string = 'post-images'): UploadResult => {
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [url, setUrl] = useState<string | null>(null);
+    const [path, setPath] = useState<string | null>(null);
 
-    const uploadFile = async (file: File): Promise<string | null> => {
+    const uploadFile = async (file: File): Promise<{ url: string; path: string } | null> => {
         setIsUploading(true);
         setError(null);
 
@@ -35,7 +37,8 @@ export const useSupabaseUpload = (bucketName: string = 'post-images'): UploadRes
                 .getPublicUrl(filePath);
 
             setUrl(publicUrl);
-            return publicUrl;
+            setPath(filePath);
+            return { url: publicUrl, path: filePath };
         } catch (err: any) {
             console.error('Upload error:', err);
             setError(err.message || 'Error uploading file');
@@ -45,5 +48,5 @@ export const useSupabaseUpload = (bucketName: string = 'post-images'): UploadRes
         }
     };
 
-    return { url, error, isUploading, uploadFile };
+    return { url, path, error, isUploading, uploadFile };
 };
