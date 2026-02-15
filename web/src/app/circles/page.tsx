@@ -50,9 +50,11 @@ export default function CirclesPage() {
                 </header>
                 <div className={styles.emptyState}>
                     <p>Log in to view and join circles.</p>
-                    <Link href="/auth/login" className={styles.createButton} style={{ marginTop: 20, textDecoration: 'none' }}>
-                        Log In
-                    </Link>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                        <Link href="/auth/login" className={styles.createButton} style={{ textDecoration: 'none' }}>
+                            Log In
+                        </Link>
+                    </div>
                 </div>
             </div>
         );
