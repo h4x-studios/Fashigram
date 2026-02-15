@@ -123,85 +123,82 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      {/* Dominant Header Controls (Sticky) */}
-      <div className={styles.feedControls}>
-        {/* Tab Switcher */}
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'new' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('new')}
-          >
-            New
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'top' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('top')}
-          >
-            Top
-          </button>
+      {/* Tab Switcher */}
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${activeTab === 'new' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('new')}
+        >
+          New
+        </button>
+        <button
+          className={`${styles.tab} ${activeTab === 'top' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('top')}
+        >
+          Top
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className={styles.filters}>
+        {/* Row 1: Style and Location side-by-side */}
+        <div className={styles.filterRow}>
+          <FilterDropdown
+            options={ALL_STYLES}
+            selectedValue={styleFilter}
+            onSelect={handleStyleChange}
+            placeholder="Search Styles..."
+            icon={
+              <StarIcon
+                className={styleFilter ? styles.starIconActive : styles.starIcon}
+                filled={!!styleFilter}
+              />
+            }
+            allLabel="All Styles"
+            rightAction={styleFilter ? (
+              <Link
+                href={`/style/${styleFilter}`}
+                className={styles.styleChevron}
+                aria-label="Go to Style Page"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ChevronRightIcon />
+              </Link>
+            ) : undefined}
+          />
+
+          <FilterDropdown
+            options={countries}
+            selectedValue={countryFilter}
+            onSelect={setCountryFilter}
+            placeholder="Search Countries..."
+            icon={
+              <GlobeIcon
+                className={countryFilter ? styles.globeIconActive : styles.globeIcon}
+              />
+            }
+            allLabel="Everywhere"
+          />
         </div>
 
-        {/* Filters */}
-        <div className={styles.filters}>
-          {/* Row 1: Style and Location side-by-side */}
-          <div className={styles.filterRow}>
+        {/* Row 2: Substyle (Conditional, Full Width) */}
+        {showSubstyleFilter && (
+          <div className={styles.filterFullWidth}>
             <FilterDropdown
-              options={ALL_STYLES}
-              selectedValue={styleFilter}
-              onSelect={handleStyleChange}
-              placeholder="Search Styles..."
+              options={availableSubstyles}
+              selectedValue={substyleFilter}
+              onSelect={setSubstyleFilter}
+              placeholder={`All ${styleFilter}`}
               icon={
                 <StarIcon
-                  className={styleFilter ? styles.starIconActive : styles.starIcon}
-                  filled={!!styleFilter}
+                  className={substyleFilter ? styles.starIconActive : styles.starIcon}
+                  filled={!!substyleFilter}
                 />
               }
-              allLabel="All Styles"
-              rightAction={styleFilter ? (
-                <Link
-                  href={`/style/${styleFilter}`}
-                  className={styles.styleChevron}
-                  aria-label="Go to Style Page"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ChevronRightIcon />
-                </Link>
-              ) : undefined}
-            />
-
-            <FilterDropdown
-              options={countries}
-              selectedValue={countryFilter}
-              onSelect={setCountryFilter}
-              placeholder="Search Countries..."
-              icon={
-                <GlobeIcon
-                  className={countryFilter ? styles.globeIconActive : styles.globeIcon}
-                />
-              }
-              allLabel="Everywhere"
+              allLabel={`All ${styleFilter}`}
             />
           </div>
-
-          {/* Row 2: Substyle (Conditional, Full Width) */}
-          {showSubstyleFilter && (
-            <div className={styles.filterFullWidth}>
-              <FilterDropdown
-                options={availableSubstyles}
-                selectedValue={substyleFilter}
-                onSelect={setSubstyleFilter}
-                placeholder={`All ${styleFilter}`}
-                icon={
-                  <StarIcon
-                    className={substyleFilter ? styles.starIconActive : styles.starIcon}
-                    filled={!!substyleFilter}
-                  />
-                }
-                allLabel={`All ${styleFilter}`}
-              />
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Post Grid */}

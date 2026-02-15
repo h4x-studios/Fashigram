@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import Logo from './Logo';
 import styles from './GlobalHeader.module.css';
-import { MenuIcon, ArrowLeftIcon } from './Icons';
+import { MenuIcon, ArrowLeftIcon, SearchIcon } from './Icons';
 import { useState } from 'react';
 import Sidebar from './Sidebar';
 
@@ -35,7 +35,13 @@ export default function GlobalHeader() {
                 </div>
 
                 <div className={styles.actionRight}>
-                    {/* Placeholder for symmetry or Search icon if desired */}
+                    {isHome ? (
+                        <button className={styles.iconButton}>
+                            <SearchIcon />
+                        </button>
+                    ) : (
+                        <div style={{ width: 40 }}></div>
+                    )}
                 </div>
             </header>
         </>
