@@ -5,51 +5,21 @@
   background: var(--background);
 }
 
-/* Header */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
+/* Filters & Tabs Container */
+.feedControls {
   background: var(--card-bg);
   border-bottom: 1px solid var(--border-light);
   position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.menuButton,
-.searchButton {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #666;
-  /* Grey tone requested */
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-}
-
-.menuButton:hover,
-.searchButton:hover {
-  color: var(--text-primary);
-}
-
-.logoContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
+  top: 60px;
+  /* Below GlobalHeader */
+  z-index: 90;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Tabs */
 .tabs {
   display: flex;
   gap: 0;
-  background: var(--card-bg);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -76,8 +46,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px;
-  background: var(--card-bg);
+  padding: 12px 16px;
 }
 
 .filterRow {
